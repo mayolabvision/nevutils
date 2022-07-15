@@ -50,9 +50,17 @@ p.addOptional('mode',false,@(x) islogical(x)||strcmp(x,'low')||strcmp(x,'high'))
 p.addOptional('readNS2',false,@islogical);
 p.addOptional('readNS5',false,@islogical);
 p.addOptional('convertEyes',false,@islogical);
+p.addOptional('convertEyesPix',false,@islogical);
 p.addOptional('nsEpoch',[0 0],@isnumeric);
 p.addOptional('dsEye',30,@isnumeric);
 p.addOptional('dsDiode',1,@isnumeric);
+p.addOptional('channelsGrab',1:400, @isnumeric);
+p.addOptional('nevreadflag', false, @islogical);
+p.addOptional('nevfilename', '', @(x) ischar(x) || iscell(x));
+p.addOptional('fnStartTimes', 0, @isnumeric);
+p.addOptional('allowNevPause', false, @islogical);
+p.addOptional('include_0_255', false, @islogical);
+
 p.parse(varargin{:});
 
 readInterTrialData = p.Results.readInterTrialData;
@@ -60,19 +68,24 @@ mode = p.Results.mode;
 readNS2 = p.Results.readNS2;
 readNS5 = p.Results.readNS5;
 convertEyes = p.Results.convertEyes;
+convertEyesPix = p.Results.convertEyesPix;
 nsEpoch = p.Results.nsEpoch;
 dsEye = p.Results.dsEye;
 dsDiode = p.Results.dsDiode;
+channelsGrab = p.Results.channelsGrab;
+nevreadflag = p.Results.nevreadflag;
+nevfilename = p.Results.nevfilename;
+fnStartTimes = p.Results.fnStartTimes;
+allowNevPause = p.Results.allowNevPause;
+include_0_255 = p.Results.include_0_255;
 
 % addpath helpers
 % optional args
-nevreadflag = 0;
 nev_info = [];
 assignopts (who, varargin);
 %% important codes
 starttrial = 1;
 endtrial = 255;
-include_0_255 = 0;
 
 if(strcmp(mode,'low'))
     readNS2 = false;
@@ -115,9 +128,9 @@ digcodes = nev(diginnevind,:);
 
 channels = unique(nev(nev(:,1) ~= 0,1:2),'rows');
 if ~include_0_255
-    channels = channels(channels(:,2) ~= 0 & channels(:,2) ~= 255 & channels(:,1) ~= 0,:);
+    channels = channels(channels(:,2) ~= 0 & channels(:,2) ~= 255 & channels(:,1) ~= 0 & ismember(channels(:, 1), channelsGrab),:);
 else
-    channels = channels(channels(:,1) ~= 0,:);
+    channels = channels(channels(:,1) ~= 0 & ismember(channels(:, 1), channelsGrab),:);
 end
 %spikecodes = nev(nev(:,1)~=0,:);
 
@@ -157,7 +170,7 @@ if ~isempty(tempdata.text)
         dat(n).time = [trialstarts(n) trialends(n)];
         thisnev = nev(trialstartinds(n):trialendinds(n),:);
         trialdig = thisnev(thisnev(:,1)==0,:);
-        tempspikes = thisnev(thisnev(:,1)~=0,:);
+        tempspikes = thisnev(thisnev(:,1)~=0 & ismember(thisnev(:, 1), channelsGrab),:);
         tempspikes(:,3) = tempspikes(:,3)*30000;
         %tempspikes(:,3) = tempspikes(:,3);
         dat(n).text = char(trialdig(trialdig(:,2)>=256 & trialdig(:,2)<512,2)-256)';
