@@ -216,6 +216,9 @@ if ~isempty(tempdata.text)
     dat = getDatParams(dat);
     
     if readNS2
+        if nevreadflag
+            filename = nevfilename;
+        end
         fn2  = replace(filename,'.nev','.ns2');
         if ~exist(fn2,'file')
             fprintf('ns2 file does not exist!\n');
@@ -225,14 +228,37 @@ if ~isempty(tempdata.text)
     end
     
     if readNS5
-        fn5  = replace(filename,'.nev','.ns5');
-        if ~exist(fn5,'file')
-            fprintf('ns5 file does not exist!\n');
+        if nevreadflag
+            filename = nevfilename;
+        end
+        if iscell(filename)
+            fn5  = cellfun(@(fn) replace(fn,'.nev','.ns5'), filename, 'uni', 0);
+            if any(cellfun(@(fn) ~exist(fn,'file'), fn5))
+                fprintf('one of the ns5 files does not exist!\n');
+                readNS5 = true;
+            end
         else
-            dat = getNS5Data(dat,fn5,'nsEpoch',nsEpoch,'dsEye',dsEye,'dsDiode',dsDiode);
+            fn5  = replace(filename,'.nev','.ns5');
+            if ~exist(fn5,'file')
+                fprintf('ns5 file does not exist!\n');
+                fprintf('ns5 file does not exist!\n');
+            end
+        end
+        if readNS5
+            dat = getNS5Data(dat,fn5,'nsEpoch',nsEpoch,'dsEye',dsEye,'dsDiode',dsDiode,'fnStartTimes', fnStartTimes,'allowpause',allowNevPause);
             if convertEyes
                 for n = 1:length(dat)
-                    dat(n).eyedata.trial(1:2,:) = eye2deg(dat(n).eyedata.trial(1:2,:),dat(n).params);
+                    %disp(size(dat(n).eyedata.trial))
+                    %disp(dat(n).eyedata.trial(:, 1))
+                    %disp(n)
+                    %if size(dat(n).eyedata.trial, 1) == 2
+                        [eyedeg, eyepix] = eye2deg(dat(n).eyedata.trial(1:2,:),dat(n).params);
+                        if convertEyesPix
+                            dat(n).eyedata.trial(1:2,:) = eyepix;
+                        else
+                            dat(n).eyedata.trial(1:2,:) = eyedeg;
+                        end
+                    %end
                 end
             end
         end
