@@ -33,7 +33,7 @@ allowpause = p.Results.allowpause;
 
 packetHeaderBytes = 9;
 %% open file
-fh   = fopen(filename, 'rb');
+fh   = fopen(filename, 'rb','n','UTF-8');
 %% get file size
 fseek(fh, 0, 1);
 filesize = ftell(fh);

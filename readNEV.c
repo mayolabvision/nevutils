@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include "mex.h"
+#include "matrix.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -61,6 +62,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     int64_t n;
     double* nevData;
     double* waveData;
+    int16_t* intData;
     int16_t tempwave;
     unsigned char junk[500];
     int16_t* nvb;
@@ -155,12 +157,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     nevData = mxGetPr(plhs[0]);
     
     /* if there are 2 params on the left side */
-    /* create a matrix to return the waverosm and fill it up below */
+    /* create a matrix to return the waveforms and fill it up below */
     if (nlhs>=2){
-        plhs[1] = mxCreateNumericMatrix(numSamples,spikeCount,mxDOUBLE_CLASS,mxREAL);
-        waveData = mxGetPr(plhs[1]);
+        if (nrhs==1){
+            plhs[1] = mxCreateNumericMatrix(numSamples,spikeCount,mxDOUBLE_CLASS,mxREAL);
+            waveData = mxGetPr(plhs[1]);
+        }else if (nrhs>1){ /* Get Int 16 data if another argument is passed - for now allow any other argument */
+            plhs[1] = mxCreateNumericMatrix(numSamples,spikeCount,mxINT16_CLASS,mxREAL);
+            intData = (int16_t*)mxGetData(plhs[1]);
+            printf("Extracting Int16 Waveforms\n");
+        }
     }
-    
     
     for (i = 0; i < spikeCount; i++)
     {
@@ -184,7 +191,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             for(n=0;n<numSamples;n++){
                 fread(&tempwave,2,1,fid);
                 if (nlhs>=2){
-                    *(waveData+i*numSamples+n) =(double)tempwave*nVperBitVec[(uint16_t)packetID]*0.001;
+                    if (nrhs==1) {
+                        *(waveData+i*numSamples+n) =(double)tempwave*nVperBitVec[(uint16_t)packetID]*0.001;
+                    }else if (nrhs > 1) {
+                        *(intData+i*numSamples+n) = tempwave;
+                    }
                 }
             }
         }
