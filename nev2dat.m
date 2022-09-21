@@ -170,7 +170,7 @@ if ~isempty(tempdata.text)
         dat(n).time = [trialstarts(n) trialends(n)];
         thisnev = nev(trialstartinds(n):trialendinds(n),:);
         trialdig = thisnev(thisnev(:,1)==0,:);
-        tempspikes = thisnev(thisnev(:,1)~=0 & ismember(thisnev(:, 1), channelsGrab),:);
+        tempspikes = thisnev(thisnev(:,1)~=0 & ismember(thisnev(:, 1:2), channels, 'rows'), :);
         tempspikes(:,3) = tempspikes(:,3)*30000;
         %tempspikes(:,3) = tempspikes(:,3);
         dat(n).text = char(trialdig(trialdig(:,2)>=256 & trialdig(:,2)<512,2)-256)';
@@ -179,7 +179,11 @@ if ~isempty(tempdata.text)
         trialdig(:,3) = trialdig(:,3)*30000;
         %dat(n).event = trialdig;
         dat(n).event = uint32(trialdig);
-        dat(n).firstspike = tempspikes(1,3);
+        if ~isempty(tempspikes)
+            dat(n).firstspike = tempspikes(1,3);
+        else
+            dat(n).firstspike = [];
+        end
         dat(n).spiketimesdiff = uint16(diff(tempspikes(:,3)));
         %dat(n).spiketimesdiff = diff(tempspikes(:,3));
         dat(n).spikeinfo = uint16(tempspikes(:,1:2));
