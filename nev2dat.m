@@ -224,7 +224,7 @@ if ~isempty(tempdata.text)
     if readNS2
         if ~isempty(ns2data)
             fn2 = ns2data;
-            dat = getNS2Data(dat,fn2);
+            dat = getNS2Data(dat,fn2,'nsEpoch',nsEpoch);
         else
             if nevreadflag
                 filename = nevfilename;
@@ -233,7 +233,7 @@ if ~isempty(tempdata.text)
             if ~exist(fn2,'file')
                 fprintf('ns2 file does not exist!\n');
             else
-               dat = getNS2Data(dat,fn2);
+               dat = getNS2Data(dat,fn2,'nsEpoch',nsEpoch);
             end
         end
     end
