@@ -1,5 +1,5 @@
-function eyeout = eye2deg(eyePt, params)
-%function eyeout = eye2deg(eyePt, params)
+function [eyeout, eyeoutPix] = eye2deg(eyePt, params)
+%function [eyeout, eyeoutPix] = eye2deg(eyePt, params)
 %
 %eye2deg takes as input a trial of eye position data and the corresponding
 %params struct from the nev file. The params input could also be something
@@ -93,6 +93,10 @@ end
 if isfield(params.block,'screnDistance')
     params.block.screenDistance = params.block.screnDistance;
 end
+
+% save the pix before converting to deg
+eyeoutPix(eyex_row, :) = eyex;
+eyeoutPix(eyey_row, :) = eyey;
 
 %Convert pixels to redefine eyex and eyey in degree space
 eyex = pix2deg(eyex, params.block.screenDistance, params.block.pixPerCM);
