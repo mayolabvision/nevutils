@@ -57,6 +57,7 @@ p.addOptional('dsDiode',1,@isnumeric);
 p.addOptional('channelsGrab',1:400, @isnumeric);
 p.addOptional('nevreadflag', false, @islogical);
 p.addOptional('nevfilename', '', @(x) ischar(x) || iscell(x));
+p.addOptional('ns2data', struct([]), @isstruct);
 p.addOptional('fnStartTimes', 0, @isnumeric);
 p.addOptional('allowNevPause', false, @islogical);
 p.addOptional('include_0_255', false, @islogical);
@@ -75,6 +76,7 @@ dsDiode = p.Results.dsDiode;
 channelsGrab = p.Results.channelsGrab;
 nevreadflag = p.Results.nevreadflag;
 nevfilename = p.Results.nevfilename;
+ns2data = p.Results.ns2data;
 fnStartTimes = p.Results.fnStartTimes;
 allowNevPause = p.Results.allowNevPause;
 include_0_255 = p.Results.include_0_255;
@@ -118,7 +120,7 @@ end
 if nargout>1
     hdr = nev_info;
 end
-    
+
 diginnevind = find(nev(:,1)==0);
 if isempty(diginnevind)
     fprintf('No digital code, Nev to dat failed!\n');
@@ -157,9 +159,9 @@ block = 1;
 predatcodes = digcodes(digcodes(:,3)<trialstarts(1),:);
 tempdata.text = char(predatcodes(predatcodes(:,2)>=256 & predatcodes(:,2)<512,2)-256)';
 if ~isempty(tempdata.text)
-    
+
     tempdata = getDatParams(tempdata);
-    
+
     %% Make Struct
     for n = 1:length(trialstarts)
         if mod(n,100) == 0
@@ -170,16 +172,20 @@ if ~isempty(tempdata.text)
         dat(n).time = [trialstarts(n) trialends(n)];
         thisnev = nev(trialstartinds(n):trialendinds(n),:);
         trialdig = thisnev(thisnev(:,1)==0,:);
-        tempspikes = thisnev(thisnev(:,1)~=0 & ismember(thisnev(:, 1), channelsGrab),:);
+        tempspikes = thisnev(thisnev(:,1)~=0 & ismember(thisnev(:, 1:2), channels, 'rows'), :);
         tempspikes(:,3) = tempspikes(:,3)*30000;
         %tempspikes(:,3) = tempspikes(:,3);
         dat(n).text = char(trialdig(trialdig(:,2)>=256 & trialdig(:,2)<512,2)-256)';
-        
+
         dat(n).trialcodes = trialdig(trialdig(:,2)<256,:);
         trialdig(:,3) = trialdig(:,3)*30000;
         %dat(n).event = trialdig;
         dat(n).event = uint32(trialdig);
-        dat(n).firstspike = tempspikes(1,3);
+        if ~isempty(tempspikes)
+            dat(n).firstspike = tempspikes(1,3);
+        else
+            dat(n).firstspike = [];
+        end
         dat(n).spiketimesdiff = uint16(diff(tempspikes(:,3)));
         %dat(n).spiketimesdiff = diff(tempspikes(:,3));
         dat(n).spikeinfo = uint16(tempspikes(:,1:2));
@@ -204,29 +210,34 @@ if ~isempty(tempdata.text)
                 block = block + 1;
             end
         end
-        
+
         if ~isempty(nev_info)
             dat(n).nevinfo.nevclockstart = nev_info.nevclockstart;
         end
-        
+
         if(isempty(dat(n).result))
             dat(n).result = NaN;
         end
     end
     dat = getDatParams(dat);
-    
+
     if readNS2
-        if nevreadflag
-            filename = nevfilename;
-        end
-        fn2  = replace(filename,'.nev','.ns2');
-        if ~exist(fn2,'file')
-            fprintf('ns2 file does not exist!\n');
+        if ~isempty(ns2data)
+            fn2 = ns2data;
+            dat = getNS2Data(dat,fn2,'nsEpoch',nsEpoch);
         else
-            dat = getNS2Data(dat,fn2);
+            if nevreadflag
+                filename = nevfilename;
+            end
+            fn2  = replace(filename,'.nev','.ns2');
+            if ~exist(fn2,'file')
+                fprintf('ns2 file does not exist!\n');
+            else
+               dat = getNS2Data(dat,fn2,'nsEpoch',nsEpoch);
+            end
         end
     end
-    
+
     if readNS5
         if nevreadflag
             filename = nevfilename;
@@ -252,12 +263,12 @@ if ~isempty(tempdata.text)
                     %disp(dat(n).eyedata.trial(:, 1))
                     %disp(n)
                     %if size(dat(n).eyedata.trial, 1) == 2
-                        [eyedeg, eyepix] = eye2deg(dat(n).eyedata.trial(1:2,:),dat(n).params);
-                        if convertEyesPix
-                            dat(n).eyedata.trial(1:2,:) = eyepix;
-                        else
-                            dat(n).eyedata.trial(1:2,:) = eyedeg;
-                        end
+                    [eyedeg, eyepix] = eye2deg(dat(n).eyedata.trial(1:2,:),dat(n).params);
+                    if convertEyesPix
+                        dat(n).eyedata.trial(1:2,:) = eyepix;
+                    else
+                        dat(n).eyedata.trial(1:2,:) = eyedeg;
+                    end
                     %end
                 end
             end

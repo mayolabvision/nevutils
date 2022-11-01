@@ -69,33 +69,36 @@ while tind <= length(dat)
         else
             eyedata.trial = eyes.data;
         end
-        eyedata.startsample = codesamples(1)/downsampleeye;
+        eyedata.startsample = floor(codesamples(1)/downsampleeye);
         eyedata.dataFs = ns5Samp/downsampleeye;
+        eyedata.codesamples(:,2) = floor(eyedata.codesamples(:,2)/downsampleeye);
         
         diode.codesamples = [codes codesamples];
         diodes = read_nsx(fn5,'chanindx',DIODE_CHAN,'begsample',round(epochStartTime*ns5Samp),'endsample',round(epochEndTime*ns5Samp), 'allowpause', allowpause);
         diode.trial = int16(downsample(diodes.data,downsamplediode));
-        diode.startsample = codesamples(1)/downsamplediode;
+        diode.startsample = floor(codesamples(1)/downsamplediode);
         diode.dataFs = ns5Samp/downsamplediode;
-        
+        diode.codesamples(:,2) = floor(diode.codesamples(:,2)/downsamplediode);
+
         pupil.codesamples = [codes codesamples];
         pupils = read_nsx(fn5,'chanindx',PUPIL_CHAN,'begsample',round(epochStartTime*ns5Samp),'endsample',round(epochEndTime*ns5Samp), 'allowpause', allowpause);
         pupil.trial = int16(downsample(pupils.data,downsamplediode));
-        pupil.startsample = codesamples(1)/downsamplediode;
+        pupil.startsample = floor(codesamples(1)/downsamplediode);
         pupil.dataFs = ns5Samp/downsamplediode;
-    
+        pupil.codesamples(:,2) = floor(pupil.codesamples(:,2)/downsamplediode);
+
 
         if ~appendDat
             dat(tind).eyedata = eyedata;
             dat(tind).diode = diode;
             dat(tind).pupil = pupil;
-            dat(tind).nsTime = (0:1:size(eyedata.trial,2)-1)./ns5Samp - nsEpoch(1);
+            dat(tind).nsTime = (0:1:length(pupil.trial)-1)./pupil.dataFs - nsEpoch(1);
         else
             % the trial at a file switch needs its data appended
             dat(tind).eyedata.trial = [dat(tind).eyedata.trial eyedata.trial];
             dat(tind).diode.trial = [dat(tind).diode.trial diode.trial];
             dat(tind).pupil.trial = [dat(tind).pupil.trial pupil.trial];
-            dat(tind).nsTime = [dat(tind).nsTime (dat(tind).nsTime(end) + (1:1:size(eyedata.trial,2))./ns5Samp - nsEpoch(1))];
+            dat(tind).nsTime = [dat(tind).nsTime (dat(tind).nsTime(end) + (1:1:length(pupil.trial))./pupil.dataFs - nsEpoch(1))];
             appendDat = false;
         end
     end

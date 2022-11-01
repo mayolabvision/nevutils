@@ -4,7 +4,14 @@ p.addOptional('nsEpoch',[0 0],@isnumeric);
 p.parse(varargin{:});
 nsEpoch = p.Results.nsEpoch;
 
-hdr2 = read_nsx(fn2,'readdata',false);
+if ischar(fn2)
+    ns2readflag = false;
+    hdr2 = read_nsx(fn2,'readdata',false);
+else
+    ns2readflag = true;
+    hdr2.hdr = fn2.hdr;
+end
+
 ns2Samp = double(hdr2.hdr.Fs);
 fprintf('Found %d channels of LFP data.\n',hdr2.hdr.nChans);
 %clockFs = double(data.hdr.clockFs);
@@ -21,9 +28,13 @@ for tind = 1:length(dat)
     msec = dat(tind).trialcodes(:,3);
     codes = dat(tind).trialcodes(:,2);
     codesamples = round(msec*ns2Samp);
-    
+
     lfpdata.codesamples = [codes codesamples];
-    lfp = read_nsx(fn2,'begsample',round(epochStartTime*ns2Samp),'endsample',round(epochEndTime*ns2Samp));
+    if ns2readflag
+        lfp.data = fn2.data(:,round(epochStartTime*ns2Samp):round(epochEndTime*ns2Samp));
+    else
+        lfp = read_nsx(fn2,'begsample',round(epochStartTime*ns2Samp),'endsample',round(epochEndTime*ns2Samp));
+    end
     lfpdata.trial = lfp.data;
     lfpdata.startsample = codesamples(1);
     lfpdata.dataFs = ns2Samp;
