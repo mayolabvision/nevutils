@@ -96,7 +96,7 @@ for tind = 1:length(dat)
             nirsdata.dxyvals(:,chan) = downsample(smooth(nirsDxy(:,chan), downsamplenirs),downsamplenirs);
         end
 
-        nsamples = size(nirsdata.trialOxy,1);
+        nsamples = size(nirsdata.oxyvals,1);
     end
 
     nirsdata.startsample = floor(codesamples(1)/downsamplenirs);
