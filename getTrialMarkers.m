@@ -74,7 +74,12 @@ end
 % **************************************************************************** %
 if strcmp(method,'portasync') || useNEV_flag
     nev = readNEV(nevfile);
-    nev_starts = nev((nev(:,1)==0 & nev(:,2)==1),3); % trial start times in NEV (chan 0, code 1)
+    if sum(nev(:,1)==0 & nev(:,2)==1001)==0
+        alignCode = 2; % FIX_ON code
+    else
+        alignCode = 1001; % special code sent with pulse
+    end
+    nev_starts = nev((nev(:,1)==0 & nev(:,2)==alignCode),3);
     portasync_nev = nev(nev(:,1)==0 & nev(:,2)==0,3); % portasync marker in NEV (chan 0, code 0)
     portasync_nev = portasync_nev(1:2:end); % only save rising edge time of marker
 
