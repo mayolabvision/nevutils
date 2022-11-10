@@ -11,7 +11,9 @@ function dat = getNIRSData(dat,fnNIRS, nevfilename,varargin)
 %                                   pulses were sent to trellis and oxymon, this
 %                                   indicates the pulse # to use for the alignment.
 %                                   [pulse # in NEV, pulse # in NIRS]
-
+% Note in early versions, the trial pulse was sent after fixation onset
+% (align to FIX_ON code). In later versions, trial pulse was sent before fixation
+% onset (align to special code 1001).
 
 p = inputParser;
 p.addOptional('dsNIRS',1, @isnumeric);
@@ -57,12 +59,21 @@ for tind = 1:length(dat)
         fprintf('Processed nirs for %i trials of %i...\n',tind,length(dat));
     end
 
-    epochStartInd = oxy_trialstartinds(tind) - (nirsEpoch(1)*nirsSamp);
+    % find # of samples between when pulse was sent and trial start code
+    tcodes = dat(tind).trialcodes;
+    if sum(tcodes(:,1)==0 & tcodes(:,2)==1001)==0 % prior to introduction of 1001 code
+        alignCode = 2; % aligned to fix_on code
+    else
+        alignCode = 1001; % aligned to 1001 code
+    end
+    s2start = floor(nirsSamp*(tcodes(tcodes(:,2)==alignCode,3) - tcodes(tcodes(:,2)==1,3)));
+
+    epochStartInd = oxy_trialstartinds(tind) - s2start - (nirsEpoch(1)*nirsSamp);
 
     %use length of trial in dat to determine # of samples to include in NIRS data
     trial_length = dat(tind).time(2) - dat(tind).time(1); % trial length in seconds
 
-    epochEndInd = oxy_trialstartinds(tind) + floor((trial_length + nirsEpoch(2))*nirsSamp);
+    epochEndInd = oxy_trialstartinds(tind) - s2start + floor((trial_length + nirsEpoch(2))*nirsSamp);
 
     if epochStartInd < 1
         epochStartInd = 1;
