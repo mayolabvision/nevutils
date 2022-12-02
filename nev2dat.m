@@ -177,7 +177,7 @@ if ~isempty(tempdata.text)
         %tempspikes(:,3) = tempspikes(:,3);
         dat(n).text = char(trialdig(trialdig(:,2)>=256 & trialdig(:,2)<512,2)-256)';
 
-        dat(n).trialcodes = trialdig(trialdig(:,2)<256,:);
+        dat(n).trialcodes = trialdig(trialdig(:,2)<256 | (trialdig(:,2)>=1000 & trialdig(:,2)<=32000),:);
         trialdig(:,3) = trialdig(:,3)*30000;
         %dat(n).event = trialdig;
         dat(n).event = uint32(trialdig);
