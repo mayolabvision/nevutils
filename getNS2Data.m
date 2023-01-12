@@ -18,7 +18,7 @@ fprintf('Found %d channels of LFP data.\n',hdr2.hdr.nChans);
 for tind = 1:length(dat)
     epochStartTime = dat(tind).time(1) - nsEpoch(1);
     epochEndTime = dat(tind).time(2) + nsEpoch(2);
-    nsEndTime = hdr2.hdr.nSamples / hdr2.hdr.Fs;
+    nsEndTime = double(hdr2.hdr.nSamples) / ns2Samp;
     if epochStartTime < 0
         epochStartTime = 0;
     end
