@@ -45,7 +45,7 @@ sf = 30000;
 for nevInd = 1:length(nevFiles)
     nevHeader = NEV_displayheader(nevFiles{nevInd});
     timeUTC = nevHeader.hour*3600 + nevHeader.minute*60 + nevHeader.second + nevHeader.millisec/1000;
-    timeEST = timeUTC - 5; if timeEST<0, timeEST= timeEST+24; end 
+    timeEST = timeUTC - 5*3600; if timeEST<0, timeEST= timeEST+24*3600; end 
     if useClockStart 
         nevTime = nevHeader.nevclockstart;
     else
