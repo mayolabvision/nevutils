@@ -32,7 +32,7 @@ clockFs = double(hdr5.hdr.clockFs);
 tind = 1;
 switchFiles = false;
 appendDat = false;
-extractNsxDataD = true;
+extractNsxData = true;
 
 while tind <= length(dat)
     epochStartTime = dat(tind).time(1) - nsEpoch(1) - datTimeShift;
