@@ -143,6 +143,11 @@ trialstarts = nev(trialstartinds,3);
 trialendindstemp = (find(digcodes(:,2)==endtrial));
 trialendinds = diginnevind(trialendindstemp);
 trialends = nev(trialendinds,3);
+
+if isempty(trialstarts) || isempty(trialends)
+    warning(['there were no trial starts or trial ends in ' filename]);
+    return;
+end
 [trialstarts, trialends,trialstartgood,trialendgood] = detectMissingStartEndCode(trialstarts,trialends);
 trialstartinds = trialstartinds(trialstartgood);
 trialendinds = trialendinds(trialendgood);
