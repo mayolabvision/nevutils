@@ -28,7 +28,8 @@ p.addOptional('specWin',60, @isscalar);
 p.addOptional('specOverlap',0.8, @isscalar)
 p.addOptional('penalty',0.001,@isscalar);
 
-p.addOptional('runAvgFlag', true, @islogical)
+p.addOptional('runAvgFlag', true, @islogical);
+p.addOptional('filtFlag',true,@islogical);
 p.addOptional('binL', 30*60, @isscalar);
 p.addOptional('shiftL', 6*60, @isscalar);
 p.addParameter('plotFigs', true, @islogical)
@@ -41,6 +42,7 @@ specWin = p.Results.specWin;
 specOverlap = p.Results.specOverlap;
 penalty = p.Results.penalty;
 runAvgFlag = p.Results.runAvgFlag;
+filtFlag = p.Results.filtFlag;
 binL = p.Results.binL;
 shiftL = p.Results.shiftL;
 plotFigs = p.Results.plotFigs;
@@ -49,9 +51,12 @@ plotFigs = p.Results.plotFigs;
 windowSize = specWin*fs; %in samples
 % Note: if specWin approaches the size of binL for slow drift there are
 % going to be very few samples in each drift bin
-
-[b,a]= butter(2,physioRange/(fs/2),'bandpass'); % narrowband filter the trace
-datFilt = filtfilt(b,a,physioDat);
+if filtFlag
+    [b,a]= butter(2,physioRange/(fs/2),'bandpass'); % narrowband filter the trace
+    datFilt = filtfilt(b,a,physioDat);
+else
+    datFilt = physioDat;
+end
 
 
 switch extractMethod
@@ -61,7 +66,7 @@ switch extractMethod
 
     case "peaks"
         % use findpeaks on trace
-        [~,pkloc] = findpeaks(datFilt,'MinPeakDistance',fs/physioRange(2));
+        [~,pkloc] = findpeaks(-1*datFilt,'MinPeakDistance',fs/physioRange(2));
         t = pkloc./fs; % convert from samples to time
         physioTrace = 1./diff(t); % time difference between adjacent peaks to frequency in Hz
         t = t(1:end-1);
@@ -88,8 +93,8 @@ if strcmp("spectrogram",extractMethod) && ~runAvgFlag
 
 else
     % otherwise bin the rate trace in the same way as the slow drift data 
-    t = t - t(1); % time bins for physiological data should be identifical to slow drfit (starting at 0)
-    [ t_runavg, physioDrift, ~] = temporalRunAvg(t,physioTrace,binL,shiftL);
+    tb = t - t(1); % time bins for physiological data should be identifical to slow drfit (starting at 0)
+    [ t_runavg, physioDrift, ~] = temporalRunAvg(tb,physioTrace,binL,shiftL);
 end
 
 end
