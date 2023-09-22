@@ -195,7 +195,7 @@ if ~isempty(tempdata.text)
         %dat(n).spiketimesdiff = diff(tempspikes(:,3));
         dat(n).spikeinfo = uint16(tempspikes(:,1:2));
         %dat(n).spikeinfo = tempspikes;
-        dat(n).result = dat(n).event(dat(n).event(:,2)==161 | dat(n).event(:,2)==162 | dat(n).event(:,2)==160 ,2);
+        dat(n).result = dat(n).event(dat(n).event(:,2)>=160 & dat(n).event(:,2)<=165,2);
         if isempty(dat(n).result)
             dat(n).result = dat(n).event(dat(n).event(:,2)>=150 & dat(n).event(:,2)<=158,2);
         end
