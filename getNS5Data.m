@@ -14,8 +14,8 @@ allowpause = p.Results.allowpause;
 
 
 DIODE_CHAN = 3;
-EYE_CHAN = [1 2 4]; % eye X, eye Y, pupil diameter
-PUPIL_CHAN = 4;
+EYE_CHAN = [1 2 3]; % eye X, eye Y, pupil diameter
+PUPIL_CHAN = 3;
 
 if ~iscell(fn5all)
     fn5all = {fn5all};

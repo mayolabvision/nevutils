@@ -59,7 +59,7 @@ p.addOptional('nevreadflag', false, @islogical);
 p.addOptional('nevfilename', '', @(x) ischar(x) || iscell(x));
 p.addOptional('ns2data', struct([]), @isstruct);
 p.addOptional('fnStartTimes', 0, @isnumeric);
-p.addOptional('allowNevPause', false, @islogical);
+p.addOptional('allowNevPause', true, @islogical);
 p.addOptional('include_0_255', false, @islogical);
 
 p.parse(varargin{:});
@@ -109,7 +109,7 @@ else
         filename = [filename,'.nev'];
     end
     if exist(filename,'file') == 2
-        nev = readNEV(filename);
+        nev = read_nev(filename);
         nev_info = NEV_displayheader(filename);
     else
         fprintf("File does not exist!\n");
@@ -178,23 +178,23 @@ if ~isempty(tempdata.text)
         thisnev = nev(trialstartinds(n):trialendinds(n),:);
         trialdig = thisnev(thisnev(:,1)==0,:);
         tempspikes = thisnev(thisnev(:,1)~=0 & ismember(thisnev(:, 1:2), channels, 'rows'), :);
-        tempspikes(:,3) = tempspikes(:,3)*30000;
-        %tempspikes(:,3) = tempspikes(:,3);
+        %tempspikes(:,3) = tempspikes(:,3)*30000;
+        tempspikes(:,3) = tempspikes(:,3);
         dat(n).text = char(trialdig(trialdig(:,2)>=256 & trialdig(:,2)<512,2)-256)';
 
         dat(n).trialcodes = trialdig(trialdig(:,2)<256 | (trialdig(:,2)>=1000 & trialdig(:,2)<=32000),:);
-        trialdig(:,3) = trialdig(:,3)*30000;
-        %dat(n).event = trialdig;
+        %trialdig(:,3) = trialdig(:,3)*30000;
+        dat(n).event = trialdig;
         dat(n).event = uint32(trialdig);
         if ~isempty(tempspikes)
             dat(n).firstspike = tempspikes(1,3);
         else
             dat(n).firstspike = [];
         end
-        dat(n).spiketimesdiff = uint16(diff(tempspikes(:,3)));
-        %dat(n).spiketimesdiff = diff(tempspikes(:,3));
-        dat(n).spikeinfo = uint16(tempspikes(:,1:2));
-        %dat(n).spikeinfo = tempspikes;
+        %dat(n).spiketimesdiff = uint16(diff(tempspikes(:,3)));
+        dat(n).spiketimesdiff = diff(tempspikes(:,3));
+        %dat(n).spikeinfo = uint16(tempspikes(:,1:2));
+        dat(n).spikeinfo = tempspikes;
         dat(n).result = dat(n).event(dat(n).event(:,2)==161 | dat(n).event(:,2)==162 | dat(n).event(:,2)==160 ,2);
         if isempty(dat(n).result)
             dat(n).result = dat(n).event(dat(n).event(:,2)>=150 & dat(n).event(:,2)<=158,2);
