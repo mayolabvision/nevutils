@@ -6,7 +6,9 @@ function [dat] = concatenateNevFiles(nevFiles,varargin)
 % all other optionals match nev2dat
 p = inputParser;
 p.addOptional('nasFlag',false,@islogical);
-p.addOptional('gammaVal',0.2,@isnumeric)
+p.addOptional('gammaVal',0.2,@isnumeric);
+p.addOptional('netname','UberNet_N50_L1',@ischar);
+p.addOptional('netFolder','../networks',@ischar);
 p.addOptional('useClockStart',false,@islogical);
 p.addOptional('readNS2',false,@islogical);
 p.addOptional('readNS5',false,@islogical);
@@ -24,6 +26,8 @@ p.addOptional('include_0_255', false, @islogical);
 p.parse(varargin{:});
 nasFlag = p.Results.nasFlag;
 gammaVal = p.Results.gammaVal;
+netname = p.Results.netname;
+netFolder = p.Results.netFolder;
 useClockStart = p.Results.useClockStart;
 readNS2 = p.Results.readNS2;
 readNS5 = p.Results.readNS5;
@@ -57,7 +61,7 @@ for nevInd = 1:length(nevFiles)
     startOffset = (nevTime - initialclockstart)./sf;
 
     if nasFlag
-    	[~, nevOutCurr,~] = runNASNet(nevFiles{nevInd}, gammaVal);
+    	[~, nevOutCurr,~] = runNASNet(nevFiles{nevInd}, gammaVal,'netname', netname, 'netFolder', netFolder);
         nevInput = nevOutCurr;
         nevreadflag = true;
     else
