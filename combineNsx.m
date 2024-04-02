@@ -10,7 +10,7 @@ p.parse(varargin{:});
 
 filtFlag = p.Results.filtFlag;
 
-hdr = read_nsx([filename{1}]);
+hdr = read_nsx([filename{1}],'readdata',false);
 fs = double(hdr.hdr.Fs);
 nChans = length(chanindx);
 nsx_combined.hdr = hdr.hdr;
