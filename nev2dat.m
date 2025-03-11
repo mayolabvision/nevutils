@@ -56,6 +56,9 @@ p.addOptional('dsEye',30,@isnumeric);
 p.addOptional('dsDiode',1,@isnumeric);
 p.addOptional('channelsGrab',1:400, @isnumeric);
 p.addOptional('nevreadflag', false, @islogical);
+p.addOptional('EYE_CHAN',[1 2 4],@isnumeric);
+p.addOptional('PUPIL_CHAN',4,@isnumeric);
+p.addOptional('DIODE_CHAN',3,@isnumeric);
 p.addOptional('nevfilename', '', @(x) ischar(x) || iscell(x));
 p.addOptional('ns2data', struct([]), @isstruct);
 p.addOptional('fnStartTimes', 0, @isnumeric);
@@ -72,6 +75,9 @@ convertEyes = p.Results.convertEyes;
 convertEyesPix = p.Results.convertEyesPix;
 nsEpoch = p.Results.nsEpoch;
 dsEye = p.Results.dsEye;
+EYE_CHAN = p.Results.EYE_CHAN;
+PUPIL_CHAN = p.Results.PUPIL_CHAN;
+DIODE_CHAN = p.Results.DIODE_CHAN;
 dsDiode = p.Results.dsDiode;
 channelsGrab = p.Results.channelsGrab;
 nevreadflag = p.Results.nevreadflag;
@@ -261,7 +267,7 @@ if ~isempty(tempdata.text)
             end
         end
         if readNS5
-            dat = getNS5Data(dat,fn5,'nsEpoch',nsEpoch,'dsEye',dsEye,'dsDiode',dsDiode,'fnStartTimes', fnStartTimes,'allowpause',allowNevPause);
+            dat = getNS5Data(dat,fn5,'nsEpoch',nsEpoch,'dsEye',dsEye,'dsDiode',dsDiode,'fnStartTimes', fnStartTimes,'allowpause',allowNevPause,'EYE_CHAN',EYE_CHAN,'PUPIL_CHAN',PUPIL_CHAN,'DIODE_CHAN',DIODE_CHAN);
             if convertEyes
                 for n = 1:length(dat)
                     %disp(size(dat(n).eyedata.trial))

@@ -3,19 +3,25 @@ p = inputParser;
 p.addOptional('dsEye',30,@isnumeric);
 p.addOptional('dsDiode',1,@isnumeric);
 p.addOptional('nsEpoch',[0 0],@isnumeric);
+p.addOptional('EYE_CHAN',[1 2 4],@isnumeric);
+p.addOptional('PUPIL_CHAN',4,@isnumeric);
+p.addOptional('DIODE_CHAN',3,@isnumeric);
 p.addOptional('fnStartTimes', 0, @isnumeric);
 p.addOptional('allowpause', false, @islogical);
 p.parse(varargin{:});
+
 downsampleeye = p.Results.dsEye;
 downsamplediode = p.Results.dsDiode;
 nsEpoch = p.Results.nsEpoch;
+EYE_CHAN = p.Results.EYE_CHAN;
+PUPIL_CHAN = p.Results.PUPIL_CHAN;
+DIODE_CHAN = p.Results.DIODE_CHAN;
 fnStartTimes = p.Results.fnStartTimes;
 allowpause = p.Results.allowpause;
 
-
-DIODE_CHAN = 3;
-EYE_CHAN = [1 2 4]; % eye X, eye Y, pupil diameter
-PUPIL_CHAN = 4;
+% DIODE_CHAN = 3;
+% EYE_CHAN = [1 2 4]; % eye X, eye Y, pupil diameter
+% PUPIL_CHAN = 4;
 
 if ~iscell(fn5all)
     fn5all = {fn5all};
