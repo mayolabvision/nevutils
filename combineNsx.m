@@ -6,11 +6,13 @@ function [nsx_combined] = combineNsx(filename, chanindx,varargin)
 p = inputParser;
 
 p.addOptional('filtFlag',false,@islogical);
+p.addOptional('filtRange',[0.01, 10],@isnumeric)
 p.parse(varargin{:});
 
 filtFlag = p.Results.filtFlag;
+filtRange = p.Results.filtRange;
 
-hdr = read_nsx([filename{1}]);
+hdr = read_nsx([filename{1}],'readdata',false);
 fs = double(hdr.hdr.Fs);
 nChans = length(chanindx);
 nsx_combined.hdr = hdr.hdr;
@@ -38,10 +40,10 @@ end
 
 combinedL = sum(fileL) + sum(n_inbetw);
 nsx_combined.hdr.timeStamps(2) = double(nsx_combined.hdr.clockFs)*combinedL/fs;
-nsx_combined.nSamples = combinedL;
+nsx_combined.hdr.nSamples = combinedL;
 
 nsx_combined.data = nan(nChans,combinedL);
-[b,a] = butter(2,[0.01 10]./(fs/2),'bandpass');
+[b,a] = butter(2,filtRange./(fs/2),'bandpass');
 
 for fn = 1:length(filename)
 nsx_temp = read_nsx(filename{fn},'chanindx',chanindx);

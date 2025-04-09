@@ -56,10 +56,13 @@ p.addOptional('dsEye',30,@isnumeric);
 p.addOptional('dsDiode',1,@isnumeric);
 p.addOptional('channelsGrab',1:400, @isnumeric);
 p.addOptional('nevreadflag', false, @islogical);
+p.addOptional('EYE_CHAN',[1 2 4],@isnumeric);
+p.addOptional('PUPIL_CHAN',4,@isnumeric);
+p.addOptional('DIODE_CHAN',3,@isnumeric);
 p.addOptional('nevfilename', '', @(x) ischar(x) || iscell(x));
 p.addOptional('ns2data', struct([]), @isstruct);
 p.addOptional('fnStartTimes', 0, @isnumeric);
-p.addOptional('allowNevPause', true, @islogical);
+p.addOptional('allowNevPause', false, @islogical);
 p.addOptional('include_0_255', false, @islogical);
 
 p.parse(varargin{:});
@@ -72,6 +75,9 @@ convertEyes = p.Results.convertEyes;
 convertEyesPix = p.Results.convertEyesPix;
 nsEpoch = p.Results.nsEpoch;
 dsEye = p.Results.dsEye;
+EYE_CHAN = p.Results.EYE_CHAN;
+PUPIL_CHAN = p.Results.PUPIL_CHAN;
+DIODE_CHAN = p.Results.DIODE_CHAN;
 dsDiode = p.Results.dsDiode;
 channelsGrab = p.Results.channelsGrab;
 nevreadflag = p.Results.nevreadflag;
@@ -109,7 +115,7 @@ else
         filename = [filename,'.nev'];
     end
     if exist(filename,'file') == 2
-        nev = read_nev(filename);
+        nev = readNEV(filename);
         nev_info = NEV_displayheader(filename);
     else
         fprintf("File does not exist!\n");
@@ -178,24 +184,24 @@ if ~isempty(tempdata.text)
         thisnev = nev(trialstartinds(n):trialendinds(n),:);
         trialdig = thisnev(thisnev(:,1)==0,:);
         tempspikes = thisnev(thisnev(:,1)~=0 & ismember(thisnev(:, 1:2), channels, 'rows'), :);
-        %tempspikes(:,3) = tempspikes(:,3)*30000;
-        tempspikes(:,3) = tempspikes(:,3);
+        tempspikes(:,3) = tempspikes(:,3)*30000;
+        %tempspikes(:,3) = tempspikes(:,3);
         dat(n).text = char(trialdig(trialdig(:,2)>=256 & trialdig(:,2)<512,2)-256)';
 
         dat(n).trialcodes = trialdig(trialdig(:,2)<256 | (trialdig(:,2)>=1000 & trialdig(:,2)<=32000),:);
-        %trialdig(:,3) = trialdig(:,3)*30000;
-        dat(n).event = trialdig;
+        trialdig(:,3) = trialdig(:,3)*30000;
+        %dat(n).event = trialdig;
         dat(n).event = uint32(trialdig);
         if ~isempty(tempspikes)
             dat(n).firstspike = tempspikes(1,3);
         else
             dat(n).firstspike = [];
         end
-        %dat(n).spiketimesdiff = uint16(diff(tempspikes(:,3)));
-        dat(n).spiketimesdiff = diff(tempspikes(:,3));
-        %dat(n).spikeinfo = uint16(tempspikes(:,1:2));
-        dat(n).spikeinfo = tempspikes;
-        dat(n).result = dat(n).event(dat(n).event(:,2)==161 | dat(n).event(:,2)==162 | dat(n).event(:,2)==160 ,2);
+        dat(n).spiketimesdiff = uint16(diff(tempspikes(:,3)));
+        %dat(n).spiketimesdiff = diff(tempspikes(:,3));
+        dat(n).spikeinfo = uint16(tempspikes(:,1:2));
+        %dat(n).spikeinfo = tempspikes;
+        dat(n).result = dat(n).event(dat(n).event(:,2)>=160 & dat(n).event(:,2)<=165,2);
         if isempty(dat(n).result)
             dat(n).result = dat(n).event(dat(n).event(:,2)>=150 & dat(n).event(:,2)<=158,2);
         end
@@ -261,7 +267,7 @@ if ~isempty(tempdata.text)
             end
         end
         if readNS5
-            dat = getNS5Data(dat,fn5,'nsEpoch',nsEpoch,'dsEye',dsEye,'dsDiode',dsDiode,'fnStartTimes', fnStartTimes,'allowpause',allowNevPause);
+            dat = getNS5Data(dat,fn5,'nsEpoch',nsEpoch,'dsEye',dsEye,'dsDiode',dsDiode,'fnStartTimes', fnStartTimes,'allowpause',allowNevPause,'EYE_CHAN',EYE_CHAN,'PUPIL_CHAN',PUPIL_CHAN,'DIODE_CHAN',DIODE_CHAN);
             if convertEyes
                 for n = 1:length(dat)
                     %disp(size(dat(n).eyedata.trial))

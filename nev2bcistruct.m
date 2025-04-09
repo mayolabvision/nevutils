@@ -77,7 +77,10 @@ for n = 1:length(trialstarts)
     dat(n).firstspike = tempspikes(1,3);
     dat(n).spiketimesdiff = uint16(diff(tempspikes(:,3)));
     dat(n).spikeinfo = uint16(tempspikes(:,1:2));
-    dat(n).result = dat(n).events(dat(n).events(:,2)>=150 & dat(n).events(:,2)<=158,2);
+    dat(n).result = dat(n).event(dat(n).event(:,2)>=160 & dat(n).event(:,2)<=165,2);
+    if isempty(dat(n).result)
+        dat(n).result = dat(n).event(dat(n).event(:,2)>=150 & dat(n).event(:,2)<=158,2);
+    end
     dat(n).params.block = tempdata.params.trial;
     if ~isempty(nev_info); dat(n).nevinfo.nevclockstart = nev_info.nevclockstart; end
     if(isempty(dat(n).result))
