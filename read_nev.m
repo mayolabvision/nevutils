@@ -138,7 +138,7 @@ m = 1;
 increment = ceil(nBytesInFile * .10); % print a status message every 10% of file
 nextthresh = increment;
 
-spike = zeros(nPacketsInFile,3);
+spike = zeros(nPacketsInFile,4);
 
 if waveson
     waves = cell(nPacketsInFile,1);
@@ -162,10 +162,12 @@ while x == 0
     
     if (electrode == 0)
         dig = typecast(tempData(9:10),'uint16');
+        sma1 = typecast(tempData(11:12),'uint16');
         
         spike(m,3) = (timestamp/samplefreq);
         spike(m,2) = dig; % value on the digital port
         spike(m,1) = 0; % zero indicates digital event
+        spike(m,4) = sma1;
         m = m + 1;
     else       
         if (waveson)
@@ -186,6 +188,7 @@ while x == 0
         spike(m,3) = timestamp/samplefreq; %global time (msec)
         spike(m,2) = class; %spike classification
         spike(m,1) = electrode;	%electrode number
+        spike(m,4) = uint16(0);
         m = m+1;
     end
     end
