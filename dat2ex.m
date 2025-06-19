@@ -117,7 +117,7 @@ completed = started + ended - 1;
 completed(completed<0) = 0;
 
 % only include completed trials in the good trials list
-goodtrials = boolean(goodtrials .* completed);
+%goodtrials = logical(goodtrials .* completed);
 
 %% Fill up cell arrays of trial data
 EVENTS = cell(size(trials(1).channels,1),max(cnds),1);

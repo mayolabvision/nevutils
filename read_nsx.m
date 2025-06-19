@@ -20,7 +20,7 @@ p.addOptional('endsample',-1,@isscalar);
 p.addOptional('chanindx',-1,@isnumeric);
 p.addOptional('readdata',true,@islogical);
 p.addOptional('keepint',false,@islogical);
-p.addOptional('allowpause',false,@islogical);
+p.addOptional('allowpause',true,@islogical);
 
 p.parse(filename,varargin{:});
 
